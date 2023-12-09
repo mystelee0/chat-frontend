@@ -13,11 +13,13 @@ import { add } from './redux/chatRepo';
 function App() {
   const client = new Client({
     //sockjs를 사용
-    webSocketFactory: () => new SockJS('http://localhost:8080/portfolio'),
+    //webSocketFactory: () => new SockJS('http://localhost:8080/portfolio'),
+    webSocketFactory:()=>new WebSocket('ws://localhost:8080/portfolio'),
     // 디버그 로그 출력
     debug: function (str) {
       console.log(str);
     },
+    
   });
 
   
@@ -29,7 +31,6 @@ function App() {
     client.onConnect = () => {
       const subscription = client.subscribe('/chat/1', (data) => {
         let message = JSON.parse(data.body)
-        console.log(message.sender, " : ", message.contents);
         dispatch(add(message));
       });
     }
@@ -39,25 +40,12 @@ function App() {
 
   const dispatch = useDispatch();
 
-  //보낼 메세지
-  let data = {
-    sender: "tom",
-    contents: "hello"
-  };
-
   return (
     <div className="App">
-      <button onClick={() => {
-        client.publish({
-          destination: '/app/greetings',
-          body: JSON.stringify(data),
-          //skipContentLengthHeader: true 
-        })
-      }}>send</button>
 
       <Routes>
         <Route path='/rooms' element={<Rooms />} />
-        <Route path='/rooms/:id' element={<ChatRoom />} />
+        <Route path='/rooms/:id' element={<ChatRoom client={client}/>} />
 
       </Routes>
 
