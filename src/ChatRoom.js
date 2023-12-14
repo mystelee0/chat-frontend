@@ -6,8 +6,9 @@ import styled from "styled-components";
 
 const Box = styled.div`
     border:1px solid black;
+
 `
-function ChatRoom({ client }) {
+function ChatRoom({ client ,url}) {
 
     let { id } = useParams();
     let chat = useSelector((state) => state.chat.find(ob => ob.id === parseInt(id)))
@@ -29,7 +30,7 @@ function ChatRoom({ client }) {
     }
     //전송
     const send = () => {
-        if (value === 'ddd') {
+        if (value === '') {
             alert('입력해주세요');
             return;
         }
@@ -48,7 +49,8 @@ function ChatRoom({ client }) {
                 //headers:{'content-type':'application/octet-stream'},
                 body: JSON.stringify(body),
             })
-            inputRef.current.value = '';
+            setValue('');
+            inputRef.current.value='';
             inputRef.current.focus();
         }
 
@@ -84,8 +86,18 @@ function ChatRoom({ client }) {
 
         return chunks;
     }
-
+    //올린파일 미리보기
+    let [src,setSrc]=useState('')
+    const fileChange=(e)=>{
+        if(e.target.files.length!==0){
+            let file=e.target.files[0];
+            let url=URL.createObjectURL(file);
+            setSrc(url);
+        }
+    }
+    
     return <Box>
+        <img src={src} style={{width:'300px'}} alt="미리보기"></img>
         {'채팅방id= ' + id}
         {
             chat === undefined ?
@@ -99,7 +111,7 @@ function ChatRoom({ client }) {
         <button onClick={() => {
             ref.current.click();
         }}>이미지</button>
-        <input type="file" ref={ref}></input>
+        <input type="file" onChange={fileChange}ref={ref}></input>
         <input ref={inputRef} onChange={onChange} onKeyUp={onKeyUp}></input>
         <button onClick={send}>보내기</button>
         <button onClick={sendbinary}>binary보내기</button>
